@@ -11,6 +11,7 @@ const authMiddleware = (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded; // Contains: { id, email, rol, cliente_id }
+    console.log('🔐 Auth middleware - User:', req.user); // DEBUG
     next();
   } catch (error) {
     return res.status(401).json({ error: 'Invalid or expired token' });
@@ -36,6 +37,14 @@ const isCliente = (req, res, next) => {
 // Allow both admin and cliente
 const isAuthenticated = authMiddleware;
 
+// Allow both admin and cliente
+const isAdminOrCliente = (req, res, next) => {
+  if (!['admin', 'cliente'].includes(req.user.rol)) {
+    return res.status(403).json({ error: 'Access denied.' });
+  }
+  next();
+};
+
 // Check if user is accessing their own data
 const isOwnerOrAdmin = (req, res, next) => {
   const requestedId = req.params.id;
@@ -58,13 +67,6 @@ module.exports = {
   isAdmin,
   isCliente,
   isAuthenticated,
-  isOwnerOrAdmin
-};
-
-// Allow both admin and cliente
-const isAdminOrCliente = (req, res, next) => {
-  if (!['admin', 'cliente'].includes(req.user.rol)) {
-    return res.status(403).json({ error: 'Access denied.' });
-  }
-  next();
+  isOwnerOrAdmin,
+  isAdminOrCliente // ADD THIS
 };
