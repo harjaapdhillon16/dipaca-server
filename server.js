@@ -7,11 +7,16 @@ const pool = require('./config/database');
 
 const app = express();
 
-// Middleware
+// Middleware - CORS as loose as possible
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true
+  origin: true, // Allow all origins
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  maxAge: 86400 // Cache preflight requests for 24 hours
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -84,7 +89,6 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 5002;
-
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📍 Health check: http://localhost:${PORT}/api/health`);
